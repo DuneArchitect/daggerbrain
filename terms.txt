@@ -1,0 +1,80 @@
+Effective Date: May 13, 2026
+Terms of Service
+
+Welcome to Daggerbrain ("Daggerbrain," "we," "our," or "us"). We operate https://daggerbrain.com, a set of rich digital tools for the Daggerheart TTRPG.
+
+By accessing or using Daggerbrain (the "Service"), you agree to these Terms of Service ("Terms") and our Privacy Policy. If you do not agree, do not use the Service.
+1. Your Content, Your Rights
+
+You retain ownership of content you create, upload, publish, sell, or otherwise provide through Daggerbrain, including homebrew rules, characters, campaigns, images, text, files, and marketplace listings.
+
+    Ownership. We do not claim ownership over your content.
+    License to Daggerbrain. By submitting content, you grant us a non-exclusive, worldwide license to host, store, reproduce, display, distribute, and promote that content as needed to operate, improve, and market the Service and the marketplace.
+    Responsibility. You are responsible for your content and for ensuring that it complies with these Terms, applicable law, third-party rights, and any applicable game license or community content rules.
+    No Exclusivity. Daggerbrain does not require exclusivity. You may share, sell, or publish your content on other platforms unless you separately agree otherwise in writing.
+
+2. Marketplace Content
+
+Daggerbrain may allow users to list, sell, purchase, download, or otherwise access digital content through a marketplace. Marketplace creators are responsible for accurate listings, lawful content, support for their products, and honoring any representations made in their listings.
+
+You may not upload or sell content that infringes intellectual property rights, violates applicable law, contains malicious files, misrepresents compatibility, or violates Daggerbrain policies. We may remove marketplace listings or suspend marketplace access at our discretion.
+3. Community Guidelines
+
+Users must help keep Daggerbrain useful, lawful, and respectful. You agree not to:
+
+    Harass, threaten, abuse, or target other users.
+    Upload infringing, unlawful, deceptive, harmful, or malicious content.
+    Interfere with the Service, security systems, billing systems, or other users.
+    Attempt to access accounts, data, or systems without authorization.
+    Use the Service to distribute spam, scams, malware, or fraudulent listings.
+
+4. Payments, Fees, and Stripe
+
+Daggerbrain may offer paid digital products, marketplace purchases, subscriptions, creator payouts, or other paid features. Payments are processed through Stripe or another third-party payment processor. Daggerbrain does not store full payment card details.
+
+Prices, taxes, commissions, platform fees, payout timing, and creator eligibility rules may vary by product, location, or marketplace program. We may update fees or marketplace rules by posting changes in the Service or otherwise notifying affected users.
+
+You are responsible for any taxes, duties, chargebacks, payment disputes, or compliance obligations that apply to your purchases, sales, creator earnings, or use of the Service.
+5. Refunds
+
+Most marketplace purchases are digital products that may be delivered or unlocked immediately. Because of that, refunds are limited and handled case by case.
+
+Refunds may be considered when:
+
+    The product was materially misrepresented in its listing.
+    The purchased file or content is missing, corrupted, or inaccessible.
+    The product was listed or sold in error.
+    Required compatibility or usage information was materially inaccurate.
+
+Refunds generally will not be granted when:
+
+    You changed your mind after purchase.
+    You successfully accessed or downloaded content that functions as described.
+    Your dissatisfaction is based on subjective preference rather than a listing fault.
+    You violated these Terms or attempted to abuse the refund process.
+
+To request a refund, contact scribe@daggerbrain.com with the order details, a description of the issue, and any helpful screenshots or error messages. We may grant or deny refunds at our discretion, subject to applicable law and payment processor rules.
+6. Accounts and Security
+
+You are responsible for maintaining the confidentiality of your account credentials and for activity under your account. Notify us promptly if you believe your account has been compromised. We may suspend or restrict accounts to protect users, creators, the marketplace, or the Service.
+7. Daggerheart Compatibility and Third-Party Rights
+
+Daggerbrain is an independent platform and is not affiliated with, endorsed by, or sponsored by Darrington Press or Critical Role. Users are responsible for complying with any applicable Daggerheart licenses, community gaming terms, publisher guidelines, and third-party intellectual property rights.
+8. Service Changes and Availability
+
+We may modify, suspend, or discontinue parts of the Service at any time. We may also add, remove, or change features, marketplace categories, access rules, or content tools. We are not liable for interruptions, data loss, or changes except where required by law.
+9. Termination
+
+We may suspend or terminate accounts, remove content, restrict marketplace access, or take other action if we believe you violated these Terms, created risk for Daggerbrain or others, infringed third-party rights, or used the Service unlawfully. If you believe an action was taken in error, contact us at scribe@daggerbrain.com.
+10. Disclaimers
+
+The Service is provided "as is" and "as available." To the fullest extent permitted by law, we disclaim warranties of merchantability, fitness for a particular purpose, non-infringement, uninterrupted availability, and error-free operation.
+11. Limitation of Liability
+
+To the fullest extent permitted by law, Daggerbrain will not be liable for indirect, incidental, consequential, special, punitive, or exemplary damages, or for lost profits, revenue, data, goodwill, or business opportunities arising from your use of the Service.
+12. Changes to These Terms
+
+We may update these Terms from time to time. If we make material changes, we may provide notice through the Service or by other reasonable means. Continued use of Daggerbrain after updated Terms are posted means you accept the changes.
+13. Contact Us
+
+Questions about these Terms can be sent to scribe@daggerbrain.com.

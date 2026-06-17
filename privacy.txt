@@ -1,0 +1,78 @@
+Privacy Policy
+
+Welcome to Daggerbrain ("Daggerbrain," "we," "our," or "us"). We operate https://daggerbrain.com, a set of rich digital tools for the Daggerheart TTRPG.
+
+This Privacy Policy explains how we collect, use, disclose, and safeguard information when you use Daggerbrain. By using the service, you agree to the collection and use of information as described in this policy.
+1. Information We Collect
+Personal Data
+
+Depending on how you use the Service, we may collect information such as your name, email address, account profile information, creator profile details, support messages, and any content you choose to upload or submit.
+Marketplace and Purchase Data
+
+If you buy or sell marketplace content, we may collect order records, purchased item metadata, entitlement records, creator payout-related identifiers, refund history, and similar transaction records needed to operate the marketplace. Payment card details are handled by Stripe and are not stored by Daggerbrain.
+Usage Data
+
+We may collect information automatically, including your IP address, browser type, device type, operating system, referring pages, pages visited, time spent on pages, and diagnostic information used to improve reliability and security.
+Cookies and Similar Technologies
+
+We may use cookies or similar technologies for authentication, preferences, security, analytics, and marketplace functionality. You can configure your browser to refuse some cookies, but parts of the Service may not work correctly without them.
+2. How We Use Information
+
+    To provide, maintain, and improve Daggerbrain.
+    To create and manage accounts, user content, and purchases.
+    To process marketplace transactions, refunds, creator payouts, and fraud prevention.
+    To provide customer support and respond to requests.
+    To monitor performance, troubleshoot errors, and secure the Service.
+    To enforce our Terms of Service and other policies.
+    To comply with legal obligations and protect our rights.
+    To send service-related notices and optional updates where permitted.
+
+3. Third-Party Service Providers
+
+We may employ third-party companies and individuals ("Service Providers") to:
+
+    Facilitate our Service.
+    Provide services on our behalf.
+    Assist us in analyzing how our Service is used.
+
+These third parties have access to your Personal Data only to perform tasks on our behalf and are obligated not to disclose or use it for other purposes.
+4. Payments
+
+Daggerbrain may offer paid digital products and marketplace content. Payments are processed by Stripe. We do not store full payment card numbers or sensitive payment credentials. Stripe's use of your information is governed by Stripe's own privacy policy.
+5. Disclosure of Information
+
+We may disclose information:
+
+    To Service Providers that support Daggerbrain.
+    To complete transactions, refunds, payouts, support, or marketplace operations.
+    When required by law, subpoena, court order, or valid governmental request.
+    To protect the rights, safety, property, and security of Daggerbrain or others.
+    In connection with a merger, acquisition, reorganization, or sale of assets.
+    With your consent or at your direction.
+
+6. Retention
+
+We retain Personal Data only for as long as necessary to provide the Service, operate the marketplace, comply with legal obligations, resolve disputes, prevent fraud, and enforce our agreements. Marketplace transaction and tax-related records may be retained for longer where required by law or legitimate business needs.
+7. Security and International Transfers
+
+We use reasonable administrative, technical, and organizational measures to protect your information, but no method of transmission or storage is completely secure. Your information may be processed in the United States or other locations where we or our Service Providers operate.
+8. Your Privacy Rights
+
+Depending on where you live, you may have rights to access, correct, delete, export, or restrict certain uses of your Personal Data. You may also have the right to object to certain processing or withdraw consent where processing is based on consent.
+
+To make a privacy request, contact us at scribe@daggerbrain.com. We may need to verify your identity before fulfilling a request.
+9. California Privacy Notices
+
+California residents may have additional privacy rights under California law, including the right to know, delete, correct, and limit certain uses of Personal Data. We do not sell Personal Data in the ordinary meaning of that term. If applicable law treats certain analytics or advertising disclosures as a "sale" or "sharing," you may contact us to request more information or opt out.
+10. Children's Privacy
+
+Daggerbrain is not intended for children under 13, and we do not knowingly collect Personal Data from children under 13. If you believe a child has provided us with Personal Data, contact us so we can take appropriate steps.
+11. Links to Other Sites
+
+The Service may contain links to third-party websites or services. We are not responsible for the content, policies, or practices of third parties. Review their policies before providing information to them.
+12. Changes to This Policy
+
+We may update this Privacy Policy from time to time. If we make material changes, we may provide notice through the Service or by other reasonable means. Continued use of Daggerbrain after changes are posted means you accept the updated policy.
+13. Contact Us
+
+Questions about this Privacy Policy can be sent to scribe@daggerbrain.com.
