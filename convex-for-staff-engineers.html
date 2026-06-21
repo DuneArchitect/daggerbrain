@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Convex for Staff Engineers — A Technical Overview</title>
+<style>
+  :root {
+    --bg: #0c1018;
+    --bg2: #11161f;
+    --panel: #161c27;
+    --panel2: #1c2330;
+    --ink: #e7ecf3;
+    --muted: #9aa7b8;
+    --faint: #6b7888;
+    --accent: #f5a623;      /* Convex amber */
+    --accent2: #ffcd6b;
+    --cyan: #5ad1e0;
+    --green: #7ee08a;
+    --red: #ff7a7a;
+    --purple: #b794f6;
+    --border: #28303d;
+    --code-bg: #0a0e15;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 700px at 75% -10%, #1a2334 0%, var(--bg) 55%);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* progress + chrome */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 50; transition: width .35s ease;
+  }
+  #counter {
+    position: fixed; bottom: 18px; right: 22px; z-index: 40;
+    font-family: var(--mono); font-size: 13px; color: var(--faint);
+    letter-spacing: .5px;
+  }
+  #counter b { color: var(--accent); }
+  #hint {
+    position: fixed; bottom: 18px; left: 22px; z-index: 40;
+    font-size: 12px; color: var(--faint);
+  }
+  #hint kbd {
+    font-family: var(--mono); background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px; color: var(--muted); font-size: 11px;
+  }
+  .navbtn {
+    position: fixed; top: 50%; transform: translateY(-50%); z-index: 40;
+    background: var(--panel); border: 1px solid var(--border); color: var(--muted);
+    width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 18px;
+    display: grid; place-items: center; transition: all .2s ease;
+  }
+  .navbtn:hover { color: var(--accent); border-color: var(--accent); }
+  #prev { left: 18px; } #next { right: 18px; }
+
+  /* slides */
+  .deck { height: 100%; width: 100%; position: relative; }
+  .slide {
+    position: absolute; inset: 0; display: none;
+    padding: 54px 7vw 70px; overflow-y: auto;
+    flex-direction: column; justify-content: center;
+    animation: fade .4s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .slide.center { align-items: center; text-align: center; }
+
+  .wrap { width: 100%; max-width: 1080px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow .num { color: var(--faint); }
+  h1 { font-size: 56px; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 18px; }
+  h1 .amber { color: var(--accent); }
+  h2 { font-size: 34px; line-height: 1.12; letter-spacing: -0.6px; margin-bottom: 22px; }
+  h3 { font-size: 18px; color: var(--accent2); margin: 0 0 8px; }
+  p.lead { font-size: 20px; color: var(--muted); line-height: 1.5; max-width: 760px; }
+  .sub { color: var(--muted); font-size: 17px; }
+
+  ul { list-style: none; }
+  li { font-size: 17px; line-height: 1.55; color: var(--ink); margin: 10px 0; padding-left: 26px; position: relative; }
+  li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; top: 0; }
+  li small { color: var(--muted); }
+  .tight li { margin: 6px 0; font-size: 16px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } h1 { font-size: 40px; } h2 { font-size: 27px; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .card h3 { display: flex; align-items: center; gap: 8px; }
+  .card.accent { border-color: #3a3320; background: linear-gradient(180deg, #1b1a14, var(--panel)); }
+
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px;
+    line-height: 1.6; color: #cdd6e3; margin: 12px 0;
+  }
+  code { font-family: var(--mono); }
+  .c  { color: #5c6b7e; font-style: italic; }      /* comment */
+  .k  { color: var(--purple); }                     /* keyword */
+  .s  { color: var(--green); }                      /* string */
+  .f  { color: var(--cyan); }                       /* function/method */
+  .t  { color: var(--accent2); }                    /* type */
+  .n  { color: #f0a878; }                            /* number/const */
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
+    font-size: 11px; letter-spacing: .4px; padding: 3px 9px; border-radius: 20px;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+  .badge.ok  { color: var(--green); border-color: #2c4a33; background: #11221580; }
+  .badge.warn{ color: var(--accent2); border-color: #4a3f22; background: #221c1080; }
+  .badge.bad { color: var(--red); border-color: #4a2c2c; background: #22111180; }
+  .badge.info{ color: var(--cyan); border-color: #24414a; background: #10202280; }
+
+  .pill { font-family: var(--mono); font-size: 12px; color: var(--accent); background:#1d1a12; border:1px solid #3a3320; padding: 2px 8px; border-radius: 6px; }
+
+  .note {
+    border-left: 3px solid var(--accent); background: var(--panel);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; color: var(--muted); font-size: 14.5px; margin-top: 14px;
+  }
+  .note.bad { border-left-color: var(--red); }
+  .note.warn { border-left-color: var(--accent2); }
+
+  .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin: 18px 0; }
+  .flow .step {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; flex: 1; min-width: 150px; position: relative;
+  }
+  .flow .step .t { color: var(--accent); font-family: var(--mono); font-size: 12px; }
+  .flow .step .d { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .flow .arrow { display: grid; place-items: center; color: var(--faint); padding: 0 10px; font-size: 18px; }
+
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-top: 8px; }
+  table.cmp th, table.cmp td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.cmp th { color: var(--accent); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
+  table.cmp td.k { color: var(--cyan); font-family: var(--mono); white-space: nowrap; }
+  table.cmp tr:hover td { background: #ffffff05; }
+
+  .cite { color: var(--faint); font-size: 12px; font-family: var(--mono); margin-top: 14px; }
+  .cite a { color: var(--faint); }
+  sup.ref { color: var(--accent); font-size: 11px; font-family: var(--mono); }
+
+  .kicker-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+
+  .src-list { columns: 2; column-gap: 30px; font-size: 13px; }
+  .src-list li { break-inside: avoid; font-size: 13px; color: var(--muted); }
+  .src-list li::before { content: "•"; }
+  @media (max-width: 900px) { .src-list { columns: 1; } }
+
+  .logo {
+    width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 26px;
+    background: linear-gradient(135deg, var(--accent), #e8821a);
+    display: grid; place-items: center; font-size: 34px; box-shadow: 0 8px 40px #f5a62333;
+  }
+  .meta-line { color: var(--faint); font-size: 14px; font-family: var(--mono); margin-top: 26px; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<button class="navbtn" id="prev" aria-label="Previous">‹</button>
+<button class="navbtn" id="next" aria-label="Next">›</button>
+<div id="counter"><b id="cur">1</b> / <span id="total">17</span></div>
+<div id="hint"><kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 — TITLE -->
+  <section class="slide center active">
+    <div class="wrap">
+      <div class="logo">◆</div>
+      <h1>What is <span class="amber">Convex</span>?</h1>
+      <p class="lead" style="margin:0 auto;">A technical overview for staff engineers — the architecture behind a
+      <em>reactive database that runs your TypeScript as transactions.</em></p>
+      <div class="meta-line">Built from a verified deep-research pass · 24 first-party claims confirmed (3-0) · 1 misconception refuted</div>
+    </div>
+  </section>
+
+  <!-- 2 — MENTAL MODEL -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02 /</span> The one-sentence model</div>
+      <h2>A cloud database that executes your API functions <span style="color:var(--accent)">as transactions, inside the database</span></h2>
+      <div class="grid2">
+        <div>
+          <p class="sub">Convex collapses three layers you normally wire together yourself:</p>
+          <ul class="tight">
+            <li><b>Database</b> — document-relational store</li>
+            <li><b>Backend</b> — your TypeScript functions <em>are</em> the API</li>
+            <li><b>Sync</b> — results stream to clients in realtime, automatically</li>
+          </ul>
+          <div class="note">"The most important thing to understand: it's a database running in the cloud that runs client-defined API functions as transactions directly within the database." <sup class="ref">1,2</sup></div>
+        </div>
+        <div class="card accent">
+          <h3>Why a staff engineer should care</h3>
+          <ul class="tight">
+            <li>No ORM, no API layer, no cache-invalidation code, no WebSocket plumbing — they're <em>structural</em>, not bolted on</li>
+            <li>The reactivity and the ACID guarantees come from <em>one</em> mechanism (we'll get there)</li>
+            <li>The constraints it imposes (determinism, OCC) are the interesting part — and the tradeoffs</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cite">Badge legend: <span class="badge ok">✓ verified 3-0</span> independently fact-checked · <span class="badge warn">⚠ docs / codebase</span> authoritative but not independently verified in this pass · <span class="badge bad">✗ refuted</span> common misconception</div>
+    </div>
+  </section>
+
+  <!-- 3 — ARCHITECTURE -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">03 /</span> Architecture</div><h2>The layered runtime behind the mental model</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="t">CLIENT</div><div class="d">React / Svelte / RN hook opens a <b>WebSocket</b>, subscribes to a query</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">FUNCTION RUNNER</div><div class="d">Your TS runs in a <b>V8 isolate</b> — deterministic, sandboxed</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">COMMITTER</div><div class="d">Validates read/write sets with <b>OCC</b>, writes to the log</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">SYNC ENGINE</div><div class="d">Detects which subscriptions went stale, re-runs &amp; pushes</div></div>
+      </div>
+      <div class="note warn"><b>Important nuance:</b> "code inside the database" is the <em>mental model Convex promotes</em>. Literally, functions run in a V8 isolate function-runner while a separate committer performs OCC validation and writes. Knowing this distinction matters when you reason about latency and failure modes. <sup class="ref">1</sup></div>
+    </div>
+  </section>
+
+  <!-- 4 — DATA MODEL -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">04 /</span> Data model</div><h2>"Document-relational"</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <ul class="tight">
+            <li><b>Document</b> — you store JSON-like nested objects</li>
+            <li><b>Relational</b> — tables, with relations expressed as <span class="pill">v.id("table")</span> typed references</li>
+            <li>Schema is optional to start, but defining it unlocks end-to-end types</li>
+            <li>Indexes are explicit; queries traverse them (no query planner guessing)</li>
+          </ul>
+          <div class="note">System fields <span class="pill">_id</span> and <span class="pill">_creationTime</span> are added to every document automatically.</div>
+        </div>
+        <div>
+<pre><code><span class="c">// convex/schema.ts</span>
+<span class="k">import</span> { defineSchema, defineTable } <span class="k">from</span> <span class="s">"convex/server"</span>;
+<span class="k">import</span> { v } <span class="k">from</span> <span class="s">"convex/values"</span>;
+
+<span class="k">export default</span> <span class="f">defineSchema</span>({
+  messages: <span class="f">defineTable</span>({
+    body:    v.<span class="f">string</span>(),
+    author:  v.<span class="f">id</span>(<span class="s">"users"</span>),   <span class="c">// typed relation</span>
+    channel: v.<span class="f">string</span>(),
+  }).<span class="f">index</span>(<span class="s">"by_channel"</span>, [<span class="s">"channel"</span>]),
+
+  users: <span class="f">defineTable</span>({ name: v.<span class="f">string</span>() }),
+});</code></pre>
+        </div>
+      </div>
+      <div class="cite">Sources: docs.convex.dev/understanding · docs.convex.dev/database</div>
+    </div>
+  </section>
+
+  <!-- 5 — FUNCTION MODEL -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">05 /</span> The function model</div><h2>Three function kinds — a deliberate split</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <table class="cmp">
+        <tr><th>Kind</th><th>Can read DB</th><th>Can write DB</th><th>Network I/O</th><th>Transaction?</th><th>Reactive?</th></tr>
+        <tr><td class="k">query</td><td>yes</td><td>no</td><td><span style="color:var(--red)">no</span></td><td>yes (read snapshot)</td><td><b style="color:var(--green)">yes</b></td></tr>
+        <tr><td class="k">mutation</td><td>yes</td><td>yes</td><td><span style="color:var(--red)">no</span></td><td><b>yes (ACID)</b></td><td>—</td></tr>
+        <tr><td class="k">action</td><td>via runQuery</td><td>via runMutation</td><td><span style="color:var(--green)">yes</span></td><td><span style="color:var(--red)">no</span></td><td>no</td></tr>
+      </table>
+      <div class="grid2" style="margin-top:18px;">
+        <div>
+<pre><code><span class="c">// query: pure, read-only, reactive</span>
+<span class="k">export const</span> list = <span class="f">query</span>({
+  args: { channel: v.<span class="f">string</span>() },
+  handler: <span class="k">async</span> (ctx, args) =&gt; {
+    <span class="k">return await</span> ctx.db.<span class="f">query</span>(<span class="s">"messages"</span>)
+      .<span class="f">withIndex</span>(<span class="s">"by_channel"</span>,
+        (q) =&gt; q.<span class="f">eq</span>(<span class="s">"channel"</span>, args.channel))
+      .<span class="f">order</span>(<span class="s">"desc"</span>).<span class="f">take</span>(<span class="n">50</span>);
+  },
+});</code></pre>
+        </div>
+        <div>
+<pre><code><span class="c">// action: network OK, NO ctx.db</span>
+<span class="k">export const</span> summarize = <span class="f">action</span>({
+  args: { channel: v.<span class="f">string</span>() },
+  handler: <span class="k">async</span> (ctx, args) =&gt; {
+    <span class="k">const</span> msgs = <span class="k">await</span> ctx.<span class="f">runQuery</span>(
+      api.messages.list, args);
+    <span class="k">const</span> r = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">"https://llm…"</span>);
+    <span class="k">await</span> ctx.<span class="f">runMutation</span>(api.messages.save, …);
+  },
+});</code></pre>
+        </div>
+      </div>
+      <div class="note">Serializability guarantees apply to <b>queries &amp; mutations only</b> — actions are explicitly <em>not</em> transactions. Keep side-effecting/network code in actions; keep correctness-critical reads &amp; writes in queries/mutations.</div>
+    </div>
+  </section>
+
+  <!-- 6 — DETERMINISM -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">06 /</span> The linchpin</div><h2>Determinism is what makes everything else possible</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <p class="lead">A query/mutation must return the same result given the same arguments + same database read set. Convex <em>enforces</em> it.</p>
+      <div class="grid2" style="margin-top:18px;">
+        <div class="card">
+          <h3>How it's enforced</h3>
+          <ul class="tight">
+            <li>No third-party <span class="pill">fetch</span> in queries/mutations</li>
+            <li><span class="pill">Date.now()</span> is frozen within a transaction</li>
+            <li><span class="pill">Math.random()</span> is seeded/deterministic</li>
+          </ul>
+        </div>
+        <div class="card accent">
+          <h3>What determinism buys you</h3>
+          <ul class="tight">
+            <li><b>Caching</b> — identical (code, args, read set) runs once for all clients</li>
+            <li><b>Transparent retries</b> — a conflicted mutation can just be re-run</li>
+            <li><b>Reactivity</b> — re-running a query yields a comparable, trustworthy result</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">"To have these attributes the handler must be deterministic." Determinism is framed as the <em>prerequisite</em> for caching, reactivity, and consistency — not a side effect. <sup class="ref">3</sup></div>
+    </div>
+  </section>
+
+  <!-- 7 — OCC -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">07 /</span> Transactions</div><h2>ACID via Optimistic Concurrency Control — no locks</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="t">1 · READ</div><div class="d">Transaction records its <b>read set</b> (objects + observed versions)</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">2 · PROPOSE</div><div class="d">A declarative proposal to write, based on what it read</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">3 · VALIDATE</div><div class="d">At commit: is every read-set version still the latest?</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="t">4 · COMMIT / RETRY</div><div class="d">All-or-nothing. On conflict → <b>re-run</b> (safe, it's deterministic)</div></div>
+      </div>
+      <div class="grid2">
+        <div><ul class="tight">
+          <li>Conflicts are checked <b>at commit time</b>, never via pessimistic locks</li>
+          <li>This is textbook Kung &amp; Robinson (1981) OCC</li>
+          <li>You "write mutations as if they will always succeed" — atomicity is guaranteed</li>
+        </ul></div>
+        <div class="note warn"><b>The honest caveat:</b> mutations can still throw application errors, or fail with a system error after exhausting the OCC retry limit under heavy contention. "Always succeeds" is the happy path, not a hard guarantee. <sup class="ref">4,5</sup></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 — SERIALIZABILITY -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">08 /</span> Isolation</div><h2>True serializability — stronger than snapshot isolation</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <h3>The claim</h3>
+          <p class="sub">Convex's OCC provides <b>true serializability</b>: results are correct regardless of which transactions run concurrently — behaviour identical to running them one at a time.</p>
+          <h3 style="margin-top:18px;">Why that's notable</h3>
+          <p class="sub">Most multi-version OCC databases give only <b>snapshot isolation</b>, which permits anomalies like <em>write skew</em>. Convex claims the strictly stronger guarantee.</p>
+        </div>
+        <div class="card">
+          <h3>Write skew (what snapshot isolation allows)</h3>
+          <pre style="margin-top:6px;"><code><span class="c">// invariant: ≥1 doctor on call</span>
+<span class="c">// T1 and T2 both read {A:on, B:on}</span>
+T1: <span class="k">if</span> (others_on_call) A = off  <span class="c">// ok at snapshot</span>
+T2: <span class="k">if</span> (others_on_call) B = off  <span class="c">// ok at snapshot</span>
+<span class="c">// both commit → 0 on call. Invariant broken.</span>
+<span class="c">// Serializable rejects one of them.</span></code></pre>
+        </div>
+      </div>
+      <div class="note warn"><b>Trust boundary:</b> this is a <em>vendor self-assertion</em>. Our research found no independent (e.g. Jepsen) verification — the strongest correctness claim rests on Convex's documented design intent. <sup class="ref">4,5</sup></div>
+    </div>
+  </section>
+
+  <!-- 9 — SYNC ENGINE -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">09 /</span> The "aha"</div><h2>Reactivity reuses the <span style="color:var(--accent)">exact same algorithm</span> as commit-conflict detection</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <p class="sub">A live query subscription is, mechanically, a transaction whose read set Convex remembers. To know if its result changed, the sync engine asks the <em>same question the committer asks</em>:</p>
+          <ul class="tight">
+            <li>Track the query's <b>index read set</b> + begin timestamp</li>
+            <li>Walk the <b>transaction log</b> after that timestamp</li>
+            <li>Does any committed write <b>overlap</b> the read set?</li>
+            <li>If yes → re-run the query, push the new result over WebSocket</li>
+          </ul>
+          <div class="note">"…using the exact same algorithm the committer uses for detecting serializability conflicts." One mechanism, two jobs. <sup class="ref">1,6</sup></div>
+        </div>
+        <div class="card accent">
+          <h3>Consequences</h3>
+          <ul class="tight">
+            <li>Every TypeScript query is realtime <b>with zero extra config</b> — if you use queries + the client libs <sup class="ref">7</sup></li>
+            <li>No manual cache invalidation, no pub/sub topics, no diffing</li>
+            <li>Reactivity is as precise as your indexes: narrow read sets = fewer needless re-runs</li>
+            <li>Applies to <b>query subscriptions only</b> — not actions, not raw HTTP</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — CACHING / SNAPSHOT -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">10 /</span> Caching &amp; consistency</div><h2>Consistent snapshots + automatic caching</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>One logical timestamp per query</h3>
+          <ul class="tight">
+            <li>All reads in a single query run at the <b>same logical timestamp</b></li>
+            <li>Concurrent writes do <b>not</b> affect that query's result mid-flight</li>
+            <li>You get a clean transactional snapshot — no torn reads</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Automatic caching</h3>
+          <ul class="tight">
+            <li>Each unique <b>(query code, params, read set)</b> executes once across all online clients</li>
+            <li>Identical query + args → cached response</li>
+            <li>Re-execution is triggered only when the read set's data changes</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note warn"><b>Read "executes only once" as idealized:</b> caches have finite capacity and eviction. The guarantee is about <em>correctness of invalidation</em>, not an absolute single execution. <sup class="ref">3,6</sup></div>
+    </div>
+  </section>
+
+  <!-- 11 — TYPE SAFETY -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">11 /</span> Type safety</div><h2>End-to-end types: validators are the source of truth</h2></div>
+        <span class="badge ok">✓ verified 3-0</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="flow" style="flex-direction:column; gap:8px;">
+            <div class="step"><div class="t">VALIDATORS / SCHEMA</div><div class="d">Source of truth — runtime validation + types</div></div>
+            <div class="arrow">↓</div>
+            <div class="step"><div class="t">GENERATED TYPES</div><div class="d"><span class="pill">Doc&lt;"t"&gt;</span> <span class="pill">Id&lt;"t"&gt;</span> in <span class="pill">_generated/dataModel</span></div></div>
+            <div class="arrow">↓</div>
+            <div class="step"><div class="t">CLIENT HOOKS</div><div class="d"><span class="pill">useQuery</span>/<span class="pill">useMutation</span> enforce arg + return types</div></div>
+          </div>
+          <div class="note">Compile-time safety. Requires TypeScript + the generated <span class="pill">api</span> object; arg types are inferred from validators with no manual annotations. <sup class="ref">8,9</sup></div>
+        </div>
+        <div>
+<pre><code><span class="c">// args validator → types inferred for free</span>
+<span class="k">export const</span> get = <span class="f">query</span>({
+  args: { id: v.<span class="f">id</span>(<span class="s">"messages"</span>) },
+  handler: <span class="k">async</span> (ctx, { id }) =&gt; {
+    <span class="k">const</span> msg = <span class="k">await</span> ctx.db.<span class="f">get</span>(id);
+    <span class="c">// msg: Doc&lt;"messages"&gt; | null</span>
+    <span class="k">return</span> msg;
+  },
+});
+
+<span class="c">// client — fully typed, reactive</span>
+<span class="k">const</span> msg = <span class="f">useQuery</span>(api.messages.get, {
+  id, <span class="c">// ← must be Id&lt;"messages"&gt;</span>
+});</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — PLATFORM SURFACE -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">12 /</span> Platform surface</div><h2>Batteries included — the built-in feature set</h2></div>
+        <span class="badge warn">⚠ docs / codebase — not independently verified</span>
+      </div>
+      <div class="grid3">
+        <div class="card"><h3>⏱ Scheduling</h3><p class="sub" style="font-size:14px;">Run a function later via <span class="pill">ctx.scheduler.runAfter</span> — also the idiom for chunking work across transaction limits.</p></div>
+        <div class="card"><h3>🗓 Cron</h3><p class="sub" style="font-size:14px;">Declare <span class="pill">crons.interval</span> / <span class="pill">crons.cron</span> in <span class="pill">crons.ts</span> against a function reference.</p></div>
+        <div class="card"><h3>📁 File storage</h3><p class="sub" style="font-size:14px;">Store <span class="pill">Blob</span>s; <span class="pill">ctx.storage.getUrl()</span> returns a signed URL; metadata in the <span class="pill">_storage</span> system table.</p></div>
+        <div class="card"><h3>🔎 Full-text search</h3><p class="sub" style="font-size:14px;">Search indexes queried with <span class="pill">withSearchIndex</span> — relevance + equality filters together.</p></div>
+        <div class="card"><h3>🧠 Vector search</h3><p class="sub" style="font-size:14px;">Native vector indexes for embeddings / semantic + RAG use cases.</p></div>
+        <div class="card"><h3>🌐 HTTP actions</h3><p class="sub" style="font-size:14px;">Public HTTP endpoints in <span class="pill">http.ts</span> via <span class="pill">httpAction</span> — for webhooks &amp; non-WebSocket clients.</p></div>
+      </div>
+      <div class="note warn"><b>Sourcing:</b> these come from official docs + this repo's Convex guidelines, but the deep-research verifier produced <em>no independently-verified claims</em> for the feature surface — treat capabilities/limits as documented, not audited. <b>Convex Components</b> (installable backend modules under <span class="pill">@convex-dev</span>) live here too and are an area of fast change.</div>
+    </div>
+  </section>
+
+  <!-- 13 — DEPLOYMENT -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">13 /</span> Deploy &amp; operate</div><h2>Dev loop, deployment, and self-hosting</h2></div>
+        <span class="badge warn">⚠ docs / codebase — not independently verified</span>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Developer loop</h3>
+          <ul class="tight">
+            <li><span class="pill">convex dev</span> watches <span class="pill">convex/</span>, pushes functions, and regenerates types live</li>
+            <li>Codegen (<span class="pill">_generated/</span>) keeps client + server in lockstep — never hand-edited</li>
+            <li>Cloud-hosted managed deployments are the default path</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Self-hosting</h3>
+          <ul class="tight">
+            <li>Open-source backend: <span class="pill">github.com/get-convex/convex-backend</span></li>
+            <li>Local deployments + self-hosted Docker images are documented</li>
+            <li>Maturity, licensing details, and ops story are evolving — verify against current docs before betting on it</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note warn">Open research question from the verifier: the <em>actual</em> deployment model (local vs cloud) and the current maturity/licensing/operational story for self-hosting were not independently verified in this pass.</div>
+    </div>
+  </section>
+
+  <!-- 14 — TRADEOFFS + REFUTED -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">14 /</span> Tradeoffs &amp; limits</div><h2>What to weigh — and one misconception to drop</h2></div>
+        <span class="badge bad">✗ includes a refuted claim</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <h3>Real tradeoffs</h3>
+          <ul class="tight">
+            <li><b>OCC contention is the throughput ceiling</b> — two transactions conflict when one writes data the other read/wrote. Hot documents serialize. <sup class="ref">10</sup></li>
+            <li>Mitigation: <b>precise queries / narrow read sets</b> → fewer conflicts → scale. Generalizes to any OCC DB.</li>
+            <li>Document &amp; transaction <b>limits</b> exist (e.g. 1MB docs, bounded reads/writes per mutation) — model around them.</li>
+            <li>Correctness claims are <b>vendor-asserted</b>; no public Jepsen audit found.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-color:#4a2c2c;">
+          <h3 style="color:var(--red);">✗ Refuted misconception</h3>
+          <p class="sub">"Convex updates <em>all</em> client subscriptions simultaneously to the same global snapshot, guaranteeing cross-client consistency."</p>
+          <div class="note bad">Verified <b>0-3 (refuted)</b>. Each client converges to fresh, consistent results — but do <b>not</b> assume globally-synchronized, same-instant snapshots across all clients. Design for per-client convergence, not a global clock. <sup class="ref">7</sup></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — COMPARISON -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">15 /</span> Positioning</div><h2>Convex vs Firebase vs Supabase vs Postgres</h2></div>
+        <span class="badge warn">⚠ framing — not independently verified</span>
+      </div>
+      <table class="cmp">
+        <tr><th>Dimension</th><th>Convex</th><th>Firebase</th><th>Supabase</th><th>Raw Postgres</th></tr>
+        <tr><td class="k">Data model</td><td>Document-relational + typed IDs</td><td>Document (NoSQL)</td><td>Relational (Postgres)</td><td>Relational</td></tr>
+        <tr><td class="k">Backend logic</td><td>TS functions = the API</td><td>Cloud Functions</td><td>Edge fns / RPC</td><td>You build it</td></tr>
+        <tr><td class="k">Reactivity</td><td>Built-in, every query</td><td>Realtime DB / Firestore listeners</td><td>Realtime on changes</td><td>DIY (LISTEN/NOTIFY)</td></tr>
+        <tr><td class="k">Consistency</td><td>Serializable (claimed)</td><td>Weaker / eventual</td><td>Postgres isolation</td><td>Full control</td></tr>
+        <tr><td class="k">Type safety</td><td>End-to-end, generated</td><td>Minimal</td><td>Generated types</td><td>DIY</td></tr>
+        <tr><td class="k">Lock-in</td><td>Higher (programming model)</td><td>High</td><td>Lower (it's Postgres)</td><td>None</td></tr>
+      </table>
+      <div class="note warn"><b>Read as framing, not benchmark.</b> The research pass produced <em>no</em> verified head-to-head comparison claims. Use this to structure an evaluation, then verify each cell against current docs for your workload.</div>
+    </div>
+  </section>
+
+  <!-- 16 — CODEBASE GROUNDING -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kicker-row">
+        <div><div class="eyebrow"><span class="num">16 /</span> Grounded in this repo</div><h2>How <span style="color:var(--accent)">Daggerbrain</span> actually uses Convex</h2></div>
+        <span class="badge info">ℹ from this codebase</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <h3>One source of truth for types</h3>
+          <p class="sub" style="font-size:14px;">Domain types are authored once in Zod, then <span class="pill">zodToConvex</span> generates both server validators and client form validation — the "end-to-end types" pitch, made concrete.</p>
+<pre style="margin-top:10px;"><code><span class="c">// schema.ts</span>
+characters: <span class="f">defineTable</span>({
+  owner_clerk_id: v.<span class="f">string</span>(),
+  campaign_id: v.<span class="f">optional</span>(v.<span class="f">id</span>(<span class="s">"campaigns"</span>)),
+  character: <span class="f">zodToConvex</span>(CharacterSchema),
+}).<span class="f">index</span>(<span class="s">"by_owner_clerk_id"</span>, [<span class="s">"owner_clerk_id"</span>]);</code></pre>
+        </div>
+        <div>
+          <h3>The architecture shows up as house rules</h3>
+          <ul class="tight">
+            <li><b>No <span class="pill">.filter()</span></b> — define an index, use <span class="pill">withIndex</span> (queries traverse indexes)</li>
+            <li><b>No unbounded arrays</b> in a doc — 1MB cap + every write rewrites the whole doc</li>
+            <li><b>Bounded reads</b> — <span class="pill">.take()</span>/paginate, never raw <span class="pill">.collect()</span></li>
+            <li><b>Split high-churn data</b> — heartbeats/typing go in their own table to avoid write contention</li>
+            <li><b>Server is the authority</b> — permissions &amp; entitlements enforced in functions, never trusted from the client</li>
+          </ul>
+          <div class="note">Each rule is a direct consequence of the OCC + transaction-limit model from the earlier slides.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — SOURCES -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">17 /</span> Sources &amp; methodology</div>
+      <h2>How this deck was built</h2>
+      <div class="grid2">
+        <div>
+          <p class="sub">A deep-research harness: 6 search angles → 24 sources fetched → 114 claims extracted → top 25 adversarially verified (3-vote, need 2/3 to kill). <b>24 confirmed, 1 refuted.</b> All surviving claims are first-party (docs + engineering blog) — authoritative for self-description, <em>not</em> independent.</p>
+          <div class="note warn">Feature-surface, deployment, and comparison slides are badged <span class="badge warn">⚠</span> because no verified claims covered them — they draw on official docs + this repo's Convex guidelines.</div>
+        </div>
+        <div>
+          <ul class="src-list">
+            <li>1. stack.convex.dev/how-convex-works</li>
+            <li>2. docs.convex.dev/understanding</li>
+            <li>3. docs.convex.dev/functions/query-functions</li>
+            <li>4. docs.convex.dev/database/advanced/occ</li>
+            <li>5. docs.convex.dev/database</li>
+            <li>6. stack.convex.dev/sync</li>
+            <li>7. docs.convex.dev/realtime</li>
+            <li>8. docs.convex.dev/.../best-practices/typescript</li>
+            <li>9. docs.convex.dev/functions/validation</li>
+            <li>10. stack.convex.dev/high-throughput-mutations-via-precise-queries</li>
+            <li>+ docs.convex.dev/search, /self-hosting, /production/state/limits; github.com/get-convex/convex-backend</li>
+          </ul>
+        </div>
+      </div>
+      <div class="meta-line">◆ Convex for Staff Engineers · verified deep-research synthesis + Daggerbrain codebase grounding</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let i = 0;
+  const curEl = document.getElementById('cur');
+  const totalEl = document.getElementById('total');
+  const bar = document.getElementById('progress');
+  totalEl.textContent = total;
+
+  function show(n) {
+    i = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    curEl.textContent = i + 1;
+    bar.style.width = ((i + 1) / total * 100) + '%';
+    // reset scroll of the now-active slide
+    slides[i].scrollTop = 0;
+    location.hash = 's' + (i + 1);
+  }
+  function next() { show(i + 1); }
+  function prev() { show(i - 1); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(total - 1); }
+    else if (e.key.toLowerCase() === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+    else if (/^[1-9]$/.test(e.key)) { show(parseInt(e.key, 10) - 1); }
+  });
+
+  // deep-link support (#s3)
+  const m = location.hash.match(/^#s(\d+)$/);
+  show(m ? parseInt(m[1], 10) - 1 : 0);
+</script>
+</body>
+</html>
